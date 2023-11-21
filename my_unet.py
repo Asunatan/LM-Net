@@ -8,9 +8,9 @@ from .blur_pool import BlurPool2d
 #from .nattentorch import LegacyNeighborhoodAttention
 #from adaPool import AdaPool2d
 #from .involution_cuda import involution
-class MyUnet(nn.Module):
+class LM_Net(nn.Module):
     def __init__(self, channel,n_classes=2, filters=[16,32, 64, 128, 256],deep_supervision=False):
-        super(MyUnet, self).__init__()
+        super(LM_Net, self).__init__()
         self.deep_supervision=deep_supervision
         self.filters=filters
 
