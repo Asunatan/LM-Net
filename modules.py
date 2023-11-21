@@ -7,15 +7,9 @@ from timm.models.layers import to_2tuple, trunc_normal_,DropPath
 from torchvision.ops.deform_conv import *
 from torchvision.ops.ps_roi_pool import *
 import torch.nn.functional as F
-# from .nonlocal_block import NONLocalBlock2D
-#from carafe import CARAFEPack
 from torch.nn.modules.utils import _pair
-# from .nattencuda import NEWNeighborhoodAttention
-# from .nattencuda import NeighborhoodAttention
 from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
-#from depthwise_conv2d_implicit_gemm import DepthWiseConv2dImplicitGEMM
-#from .involution_cuda import involution
 from natten import NeighborhoodAttention2D
 
 
@@ -34,36 +28,17 @@ class OverlapPatchEmbed(nn.Module):
                                        stride=stride,
                              padding = (patch_size[0] // 2, patch_size[1] // 2)
         )
-        # self.patch_embeddings = nn.Sequential(
-        #     Rearrange('b c (h p1) (w p2) -> b (h w) (p1 p2 c)', p1 = patchsize, p2 = patchsize),
-        #     nn.Linear(patch_dim, embed_dim)
-        # )
-        #self.norm = nn.LayerNorm(embed_dim)
-        #self.position_embeddings = nn.Parameter(torch.zeros(1, n_patches, embed_dim))
-        #self.dropout = nn.Dropout(0.1)
 
 
     def forward(self, x):
-        # if torch.isnan(x).any():
-        #     print(f'OverlapPatchEmbed之前输出出现了NAN!')
         x = self.patch_embeddings(x)
-        # if torch.isnan(x).any():
-        #     print(f'输出出现了NAN!')
         if self.model=='nat':
             x=x.permute(0, 2, 3, 1)
         else:
             x = x.flatten(2).transpose(1, 2)#+self.position_embeddings
-        #x=x.flatten(2).transpose(1, 2)#.permute(0, 2, 3, 1)  #  (B, n_patches, hidden)
-        #x=x+self.position_embeddings
-        #x=self.norm(x)
-        # if torch.isnan(x).any():
-        #     print(f'OverlapPatchEmbed之后输出出现了NAN!')
+
         return x
-        # x = x.flatten(2)
-        # x = x.transpose(1, 2)  # (B, n_patches, hidden)
-        # embeddings = x + self.position_embeddings
-        # embeddings = self.dropout(embeddings)
-        # return embeddings
+
 class Mlp(nn.Module):
     def __init__(self, in_channel, mlp_channel,out_channel):
         super(Mlp, self).__init__()
@@ -417,16 +392,10 @@ class BottomTransformer(nn.Module):
     def forward(self, x):
         B,C,H,W = x.shape
         x_embedding=self.patchembedding(x)
-        # if torch.isnan(x_embedding).any():
-        #     print(f'BottomTransformer输出出现了NAN!')
         att = self.attention(self.norm1(x_embedding)) + x_embedding
         x = self.mlp(self.norm2(att)) + att
         x = x.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
-        # if torch.isnan(x).any():
-        #     print(f'BottomTransformer输出出现了NAN!')
         x=self.conv(x)
-        # if torch.isnan(x).any():
-        #     print(f'BottomTransformer输出出现了NAN!')
         return x
 class PoolTransformer(nn.Module):
     def __init__(self, patchsize, img_size, in_channels,out_channel,stride,num_heads,pool_ratios=[1, 2, 3, 6]):
@@ -486,15 +455,6 @@ class NAT_Global_Transformer(nn.Module):
             [nn.Conv2d(out_channel, out_channel,3,1,1, groups=out_channel) for tempin in pool_ratios])
 
     def forward(self,xq,xkv ):
-        # B,C,H,W = xkv.shape
-        #
-        # x_embedding2=self.patchembedding2(xq)
-        # att2=self.drop_path(self.att2(self.norm2(x_embedding2),self.patch_hw,self.patch_hw))+ x_embedding2
-        #
-        # att2 = att2.reshape(B, self.patch_hw, self.patch_hw, -1).permute(0, 3, 1, 2).contiguous()
-        # if self.stride>1:
-        #     att2=self.up_conv(att2)
-
         x_embedding1 = self.patchembedding1(xq)
         x_embedding3 = self.patchembedding3(xkv)
         xq=self.norm1(x_embedding1)
@@ -598,11 +558,9 @@ class NeighborhoodTransformer(nn.Module):
     def forward(self, x):
         x_embedding= self.patchembedding(x)
         x= self.norm1(x_embedding)
-        att = self.att1(x)+x_embedding+self.att2(x)
+        att = self.att1(x)+x_embedding#+self.att2(x)
         x = self.mlp(self.norm2(att)) + att
         x = x.permute(0, 3, 1, 2).contiguous()
-        # if torch.isnan(x).any():
-        #     print(f'NeighborhoodTransformer输出出现了NAN!!')
         return x
 
 
