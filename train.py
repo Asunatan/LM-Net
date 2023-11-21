@@ -27,7 +27,7 @@ from seg.SSformer.mit_PLD_b4 import mit_PLD_b4
 from seg.TransUNet import get_r50_b16_config, VisionTransformer
 from seg.TransUNet.transunet import TransUNet
 from seg.att_unet import Att_unet
-from seg.core.my_unet import MyUnet
+from seg.core.my_unet import LM_Net
 from seg.res_unet import ResUnet
 from seg.res_unetplusplus import ResUnetPlusPlus
 from seg.seg_former import mit_b0
@@ -72,20 +72,10 @@ def main_single(rank, k_fold, args):
                                  ,'deeplabv3+','FCN_ResNet50',]#'my_unet'
         for i, dataset_name in enumerate(dataset_names):
             for j,model_name in enumerate(model_name_list):
-                if model_name=='my_unet' and dataset_name=='BUSI':
-                    model_name='my_unet_7k'
-                    csv_file = model_name + '{}_{}.csv'.format(dataset_name, k_fold)
-                    model_name='my_unet'
-                else:
-                    csv_file = model_name +'{}_{}.csv'.format(dataset_name, k_fold)
+                csv_file = model_name +'{}_{}.csv'.format(dataset_name, k_fold)
                 data = pd.read_csv(csv_file)
-                if model_name=='my_unet'and dataset_name=='BUSI' :
-                    mdice_list = data.iloc[:,-13]#4
-                else:
-                    mdice_list = data.iloc[:, -13]
-                    #Kvasir用都验证集
-                    #basic分开
-                    #
+                mdice_list = data.iloc[:, -13]
+                    
                 if model_name=='unet':
                     model_name='Unet'
                 if model_name=='unet++':
@@ -167,7 +157,7 @@ def main_single(rank, k_fold, args):
     # 实例化模型
     if args.model=='my_unet':
         print('my_unet')
-        model = MyUnet(3, args.num_classes, deep_supervision=args.deep_supervision)
+        model = LM_Net(3, args.num_classes, deep_supervision=args.deep_supervision)
         #args.model='my_unet_7k'
         print(args.model)
     if args.model=='swin_unet':
