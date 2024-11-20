@@ -26,7 +26,7 @@ from seg.SSformer.mit_PLD_b4 import mit_PLD_b4
 from seg.TransUNet import get_r50_b16_config, VisionTransformer
 from seg.TransUNet.transunet import TransUNet
 from seg.att_unet import Att_unet
-from seg.core.LM_Net import MyUnet
+from seg.core.LM_Net import LM_Net
 from seg.res_unet import ResUnet
 from seg.res_unetplusplus import ResUnetPlusPlus
 from seg.seg_former import mit_b0
@@ -146,9 +146,9 @@ def main_single(rank, k_fold, args):
     test_loader=DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=args.num_workers,
                             pin_memory=True)
     # 实例化模型
-    if args.model=='my_unet':
-        print('my_unet')
-        model = MyUnet(3, args.num_classes, deep_supervision=args.deep_supervision)
+    if args.model=='LM_Net':
+        print('LM_Net')
+        model = LM_Net(3, args.num_classes, deep_supervision=args.deep_supervision)
         print(args.model)
     if args.visualization is True:
         save_path = '/home/uax/SCY/seg/visualization'
@@ -269,8 +269,8 @@ if __name__ == '__main__':
     parser.add_argument('--num_workers', type=float, default=2)
     parser.add_argument('--dataset', type=str, default='Kvasir',
                         choices=['Basic','Kvasir','BUSI','CVCDataset','VOC2012'],help='choose dataset')
-    parser.add_argument('--model', type=str, default='unet',
-                        choices=['res50+trans_unet','my_unet','unet','unet++','uctrans_net','pre_swin_unet',
+    parser.add_argument('--model', type=str, default='LM_Net',
+                        choices=['res50+trans_unet','LM_Net','unet','unet++','uctrans_net','pre_swin_unet',
                                  'att_unet','res_unet', 'res_unet++', 'trans_unet', 'swin_unet',
                                  'seg_former','fcb_former','deeplabv3+','ssformer','FCN_ResNet50','ESFPNet'],
                         help='choose model')
