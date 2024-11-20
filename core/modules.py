@@ -327,32 +327,24 @@ class PoolingAttention(nn.Module):
         x = self.proj(x)
 
         return x
-class BottomTransformer(nn.Module):
+class GFT(nn.Module):
     def __init__(self, patchsize, img_size, in_channels,expand_ratios,out_channel,stride,num_heads):
-        super(BottomTransformer, self).__init__()
+        super(GFT, self).__init__()
         self.patchembedding=OverlapPatchEmbed(patchsize, img_size, in_channels,in_channels,stride)
         self.norm1=nn.LayerNorm(in_channels)
         self.attention=GlobalAttention(in_channels,num_heads)
         self.norm2 = nn.LayerNorm(in_channels)
         self.mlp = Mlp(in_channels, expand_ratios*in_channels,in_channels)
         self.conv=nn.Sequential(nn.Conv2d(in_channels,out_channel,1),
-                                # nn.BatchNorm2d(out_channel),
-                                # nn.ReLU(True)
                                 )
 
     def forward(self, x):
         B,C,H,W = x.shape
         x_embedding=self.patchembedding(x)
-        # if torch.isnan(x_embedding).any():
-        #     print(f'BottomTransformer输出出现了NAN!')
         att = self.attention(self.norm1(x_embedding)) + x_embedding
         x = self.mlp(self.norm2(att)) + att
         x = x.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
-        # if torch.isnan(x).any():
-        #     print(f'BottomTransformer输出出现了NAN!')
         x=self.conv(x)
-        # if torch.isnan(x).any():
-        #     print(f'BottomTransformer输出出现了NAN!')
         return x
 class PoolTransformer(nn.Module):
     def __init__(self, patchsize, img_size, in_channels,out_channel,stride,num_heads,pool_ratios=[1, 2, 3, 6]):
