@@ -552,12 +552,6 @@ class ReparamConv(nn.Module):
                                          padding=large_kernel_size//2,  groups=expand_channels,bias=False)),
                  ('bn', nn.BatchNorm2d(expand_channels))
                  ]))
-            # self.big_large_conv = nn.Sequential(OrderedDict(
-            #     [('conv',nn.Conv2d(in_channels=expand_channels, out_channels=expand_channels,
-            #                              kernel_size=7, stride=stride,
-            #                              padding=3, dilation=1, groups=expand_channels,bias=False)),
-            #      ('bn', nn.BatchNorm2d(expand_channels))
-            #      ]))
             self.square_conv = nn.Sequential(OrderedDict([
                 ('conv',nn.Conv2d(in_channels=expand_channels, out_channels=expand_channels,
                                          kernel_size=kernel_size, stride=stride,
@@ -578,22 +572,6 @@ class ReparamConv(nn.Module):
                 ('bn', nn.BatchNorm2d(expand_channels))
             ]))
 
-            # self.dilation_conv = nn.Sequential(OrderedDict([
-            #      ('conv',nn.Conv2d(in_channels=expand_channels, out_channels=expand_channels,
-            #                           kernel_size=large_kernel_size,stride=stride,
-            #                           padding=4 ,dilation=2, groups=expand_channels, bias=False,)),
-            #     ('bn', nn.BatchNorm2d(expand_channels))
-            # ]))
-            # self.singel_conv = nn.Sequential(OrderedDict([
-            #     ('conv',nn.Conv2d(in_channels=expand_channels, out_channels=expand_channels,
-            #                           kernel_size=1,stride=stride,
-            #                           groups=expand_channels, bias=False,)),
-            #     ('bn', nn.BatchNorm2d(expand_channels))
-            # ]))
-
-
-
-        #self.bn= nn.BatchNorm2d(expand_channels)
         self.active = nn.GELU()
 
         self.pointwise_conv = nn.Sequential(
@@ -611,23 +589,16 @@ class ReparamConv(nn.Module):
         if self.deploy:
             out = self.fuse_conv(x1)
         else:
-            #out = self.square_conv(x1)
-            # out = self.large_conv(x1)
-            #
-            # out += self.ver_conv(x1)
-            # out += self.hor_conv(x1)
 
             out = self.large_conv(x1)
             out += self.square_conv(x1)
             out += self.ver_conv(x1)
             out += self.hor_conv(x1)
-            # out += self.dilation_conv(x1)
-            # out += self.big_large_conv(x1)
 
         x1 = self.se(self.active(out))
         x1 = self.pointwise_conv(x1)
         out = x1 + self.shortcut(x)
-        return out #self.bn_active(out)
+        return out
 
     def fuse_bn(self,conv, bn, mobel='no avg'):
         if mobel == 'avg':
