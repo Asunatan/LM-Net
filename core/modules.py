@@ -24,46 +24,22 @@ class OverlapPatchEmbed(nn.Module):
     def __init__(self, patchsize, img_size, in_channels,embed_dim,stride,model='no nat'):#8,32,128
         super().__init__()
         self.model=model
-        img_size = _pair(img_size)
         patch_size = _pair(patchsize)
-        n_patches = (img_size[0] // patch_size[0]) * (img_size[1] // patch_size[1])
-        patch_dim=in_channels * (patchsize **2)
         self.patch_embeddings = nn.Conv2d(in_channels=in_channels,
                                        out_channels=embed_dim,
                                        kernel_size=patchsize,
                                        stride=stride,
                              padding = (patch_size[0] // 2, patch_size[1] // 2)
         )
-        # self.patch_embeddings = nn.Sequential(
-        #     Rearrange('b c (h p1) (w p2) -> b (h w) (p1 p2 c)', p1 = patchsize, p2 = patchsize),
-        #     nn.Linear(patch_dim, embed_dim)
-        # )
-        #self.norm = nn.LayerNorm(embed_dim)
-        #self.position_embeddings = nn.Parameter(torch.zeros(1, n_patches, embed_dim))
-        #self.dropout = nn.Dropout(0.1)
-
-
+        
     def forward(self, x):
-        # if torch.isnan(x).any():
-        #     print(f'OverlapPatchEmbed之前输出出现了NAN!')
         x = self.patch_embeddings(x)
-        # if torch.isnan(x).any():
-        #     print(f'输出出现了NAN!')
         if self.model=='nat':
             x=x.permute(0, 2, 3, 1)
         else:
             x = x.flatten(2).transpose(1, 2)#+self.position_embeddings
-        #x=x.flatten(2).transpose(1, 2)#.permute(0, 2, 3, 1)  #  (B, n_patches, hidden)
-        #x=x+self.position_embeddings
-        #x=self.norm(x)
-        # if torch.isnan(x).any():
-        #     print(f'OverlapPatchEmbed之后输出出现了NAN!')
         return x
-        # x = x.flatten(2)
-        # x = x.transpose(1, 2)  # (B, n_patches, hidden)
-        # embeddings = x + self.position_embeddings
-        # embeddings = self.dropout(embeddings)
-        # return embeddings
+
 class Mlp(nn.Module):
     def __init__(self, in_channel, mlp_channel,out_channel):
         super(Mlp, self).__init__()
