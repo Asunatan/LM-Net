@@ -48,23 +48,26 @@ def create_BasicDataset_df():
                 masks.append(mask_abpath)
                 images.append(mask_abpath.replace('_mask', ''))
     PathDF = pd.DataFrame({'images': images, 'masks': masks,'diagnosis':diagnosis})
-    train_df_8, test_df_2 = train_test_split(PathDF, random_state=10086, test_size=0.2,shuffle=True,stratify=PathDF['diagnosis'])
-    # train_df_8, test_df_2 = train_test_split(PathDF, random_state=10086, test_size=0.2,shuffle=True)
-    test_df_2.to_csv("test_Basic_0.2.csv", index=False)
-    train_df_8.to_csv("train_Basic_0.8.csv", index=False)
+    # train_df_8, test_df_2 = train_test_split(PathDF, random_state=10086, test_size=0.2,shuffle=True,stratify=PathDF['diagnosis'])
+    # # train_df_8, test_df_2 = train_test_split(PathDF, random_state=10086, test_size=0.2,shuffle=True)
+    # test_df_2.to_csv("test_Basic_0.2.csv", index=False)
+    # train_df_8.to_csv("train_Basic_0.8.csv", index=False)
     # 5折
-    train_df, test_df = train_test_split(PathDF, random_state=10086, test_size=0.1, shuffle=True,stratify=PathDF['diagnosis'])
+    train_val_df, test_df = train_test_split(PathDF, random_state=10086, test_size=0.1, shuffle=True,stratify=PathDF['diagnosis'])
     test_df.to_csv("test_Basic_0.1.csv", index=False)
+    train_df, val_df = train_test_split(train_val_df, random_state=10086, test_size=0.1, shuffle=True)
+    val_df.to_csv("val_Basic_0.1.csv", index=False)
+    train_df.to_csv("train_Basic_0.8.csv", index=False)
     skf = StratifiedKFold(n_splits=5, shuffle=True)
-    for Fold_i, (train_index, val_index) in enumerate(skf.split(train_df, train_df['diagnosis'])):
-        X_train, X_test = train_df.iloc[train_index], train_df.iloc[val_index]
+    for Fold_i, (train_index, val_index) in enumerate(skf.split(train_val_df, train_val_df['diagnosis'])):
+        X_train, X_test = train_val_df.iloc[train_index], train_val_df.iloc[val_index]
         X_train.to_csv("train_Basic_{}.csv".format(Fold_i), index=False)
         X_test.to_csv("val_Basic_{}.csv".format(Fold_i), index=False)
 
     #valid_df, test_df = train_test_split(rest, random_state=42, test_size=0.1,shuffle=True)
     #return train_df, valid_df
 def create_KvasirDataset_df():
-    data_dir='/home/uax/SCY/seg/dataset/kvasir-seg/images'
+    data_dir='/data/scy/SCY/LM-Net-main/dataset/Kvasir-SEG'
     images, masks = [], []
     for root, folders, files in os.walk(data_dir):  # 在目录树中游走,会打开子文件夹
         for file in files:
@@ -78,11 +81,14 @@ def create_KvasirDataset_df():
     # test_df_2.to_csv("test_Kvasir_0.2.csv", index=False)
     # train_df_8.to_csv("train_Kvasir_0.8.csv", index=False)
     #5折
-    train_df, test_df = train_test_split(PathDF, random_state=10086, test_size=0.1, shuffle=True)
+    train_val_df, test_df = train_test_split(PathDF, random_state=10086, test_size=0.1, shuffle=True)
     test_df.to_csv("test_Kvasir_0.1.csv", index=False)
+    train_df, val_df = train_test_split(train_val_df, random_state=10086, test_size=0.1, shuffle=True)
+    val_df.to_csv("val_Kvasir_0.1.csv", index=False)
+    train_df.to_csv("train_Kvasir_0.8.csv", index=False)
     skf = KFold(n_splits=5,shuffle=True)
-    for Fold_i,(train_index, val_index) in enumerate(skf.split(train_df)):
-        X_train, X_test = train_df.iloc[train_index], train_df.iloc[val_index]
+    for Fold_i,(train_index, val_index) in enumerate(skf.split(train_val_df)):
+        X_train, X_test = train_val_df.iloc[train_index], train_val_df.iloc[val_index]
         X_train.to_csv("train_Kvasir_{}.csv".format(Fold_i), index=False)
         X_test.to_csv("val_Kvasir_{}.csv".format(Fold_i), index=False)
 
@@ -109,15 +115,18 @@ def create_BUSI_Dataset_df():
     train_df_8, test_df_2 = train_test_split(PathDF, random_state=10086, test_size=0.2, shuffle=True,
                                              stratify=PathDF['diagnosis'])
     # train_df_8, test_df_2 = train_test_split(PathDF, random_state=10086, test_size=0.2,shuffle=True)
-    test_df_2.to_csv("test_BUSI_0.2.csv", index=False)
-    train_df_8.to_csv("train_BUSI_0.8.csv", index=False)
+    # test_df_2.to_csv("test_BUSI_0.2.csv", index=False)
+    # train_df_8.to_csv("train_BUSI_0.8.csv", index=False)
     # 5折
-    train_df, test_df = train_test_split(PathDF, random_state=10086, test_size=0.1, shuffle=True,
+    train_val_df, test_df = train_test_split(PathDF, random_state=10086, test_size=0.1, shuffle=True,
                                          stratify=PathDF['diagnosis'])
+    train_df, val_df = train_test_split(train_val_df, random_state=10086, test_size=0.1, shuffle=True)
+    val_df.to_csv("val_BUSI_0.1.csv", index=False)
     test_df.to_csv("test_BUSI_0.1.csv", index=False)
+    train_df.to_csv("train_BUSI_0.8.csv", index=False)
     skf = StratifiedKFold(n_splits=5, shuffle=True)
-    for Fold_i, (train_index, val_index) in enumerate(skf.split(train_df, train_df['diagnosis'])):
-        X_train, X_test = train_df.iloc[train_index], train_df.iloc[val_index]
+    for Fold_i, (train_index, val_index) in enumerate(skf.split(train_val_df, train_val_df['diagnosis'])):
+        X_train, X_test = train_val_df.iloc[train_index], train_val_df.iloc[val_index]
         X_train.to_csv("train_BUSI_{}.csv".format(Fold_i), index=False)
         X_test.to_csv("val_BUSI_{}.csv".format(Fold_i), index=False)
 
@@ -196,7 +205,7 @@ class MedicineDataset(Dataset):
             A.Normalize(),
             ToTensorV2()])
         self.train_transform =  A.Compose([
-            A.RandomResizedCrop(256, 256, scale=(0.8, 1.0), p=1.0),
+            A.RandomResizedCrop((256, 256), scale=(0.8, 1.0), p=1.0),
             #A.Resize(256, 256),
             A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=30, border_mode=cv2.BORDER_CONSTANT,
                                value=0, p=0.5),
@@ -392,7 +401,7 @@ if __name__ == "__main__":
     #b=os.path.abspath('')
     #data_img = r"/home/gxmdjzx/.pycharm_helpers/pycharm/py_project/Dataset_BUSI_with_GT/"
     set_seed(10086)
-    create_BUSI_Dataset_df()
+    create_KvasirDataset_df()
     # data_img = r"/home/uax/SCY/seg/dataset/Thyroid_data/image"
     # set_seed(42)
     # train_df, valid_df = create_Thyroid_Dataset_df(data_img)
