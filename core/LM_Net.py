@@ -4,7 +4,7 @@ from .modules import *
 
 class LM_Net(nn.Module):
     def __init__(self, channel,n_classes=2, filters=[12,24, 48, 96, 192],deep_supervision=False):
-        super(MyUnet, self).__init__()
+        super(LM_Net, self).__init__()
         self.deep_supervision=deep_supervision
         self.filters=filters
 
@@ -66,11 +66,11 @@ class LM_Net(nn.Module):
                       )
         self.up3 =nn.Sequential(
                       nn.Upsample(scale_factor=2, mode='bilinear',align_corners=True),
-                      nn.Conv2d(filters[2], 4*filters[1], 3,1,1),
+                      nn.Conv2d(filters[2], filters[1], 3,1,1),
                       )
         self.up4 =nn.Sequential(
                       nn.Upsample(scale_factor=2, mode='bilinear',align_corners=True),
-                      nn.Conv2d(filters[1], 4*filters[0], 3,1,1),
+                      nn.Conv2d(filters[1], filters[0], 3,1,1),
                       )
 
         self.skip1 = M2Skip([filters[2],filters[3]],'bottom')
