@@ -6,8 +6,6 @@ import argparse
 from matplotlib import style
 import matplotlib.pyplot as plt
 from matplotlib import cm
-from models.my_model import SwinSeg
-import ignite
 from torch.utils.data import DataLoader
 import numpy as np
 import pandas as pd
@@ -19,21 +17,9 @@ import torch
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 from dataset.data_loading import *
-from seg.Deeplabv3plus import DeepLab
-from seg.ESFPNet import ESFPNetStructure
-from seg.FCBFormer import FCBFormer
-from seg.SSformer.mit_PLD_b4 import mit_PLD_b4
-from seg.TransUNet import get_r50_b16_config, VisionTransformer
-from seg.TransUNet.transunet import TransUNet
-from seg.att_unet import Att_unet
-from seg.core.LM_Net import LM_Net
-from seg.res_unet import ResUnet
-from seg.res_unetplusplus import ResUnetPlusPlus
-from seg.seg_former import mit_b0
-from seg.uctrans_net import Config, UCTransNet
-from seg.unet import Unet
-from seg.unetplusplus import UNetplusplus
-from swin_unet.swin_unet import SwinUnet
+
+from core.LM_Net import LM_Net
+
 from utils.distributed_utils import init_distributed_mode, dist, cleanup
 from utils.train_eval_utils import train_one_epoch, evaluate, visualization
 from utils.loss import DiceLoss
@@ -43,9 +29,9 @@ from utils.distributed_utils import get_rank
 from torchmetrics import MetricCollection, Accuracy, Precision, Recall, AUROC, F1Score, JaccardIndex, Dice, Specificity
 
 #from scipy.spatial.distance import directed_hausdorff
-from skimage.metrics import hausdorff_distance
+# from skimage.metrics import hausdorff_distance
 #from medpy.metric.binary import hd,hd95
-from lion_pytorch import Lion
+
 def main_single(rank, k_fold, args):
     if torch.cuda.is_available() is False:
         raise EnvironmentError("not find GPU device for training.")
@@ -266,7 +252,7 @@ if __name__ == '__main__':
     parser.add_argument('--syncBN', type=bool, default=False)
     parser.add_argument('--smoothing', type=float, default=0.001,
                         help='Label smoothing (default: 0.1)')
-    parser.add_argument('--num_workers', type=float, default=2)
+    parser.add_argument('--num_workers', type=float, default=10)
     parser.add_argument('--dataset', type=str, default='Kvasir',
                         choices=['Basic','Kvasir','BUSI','CVCDataset','VOC2012'],help='choose dataset')
     parser.add_argument('--model', type=str, default='LM_Net',
@@ -276,7 +262,7 @@ if __name__ == '__main__':
                         help='choose model')
     parser.add_argument('--categories', type=str, default='binary', choices=['binary', 'multiclass', 'multilabel'])
     parser.add_argument('--visualization', type=bool, default=False)
-    parser.add_argument('--test', type=bool, default=True)
+    parser.add_argument('--test', type=bool, default=False)
     parser.add_argument('--resume', type=bool, default=False, help='put the path to resuming file if needed')
     # 不要改该参数，系统会自动分配
     parser.add_argument('--rank', default=0, help='device id (i.e. 0 or 0,1 or cpu)')
