@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from .blur_pool import BlurPool2d
 import numpy as np
 import torch.nn as nn
 import torch
