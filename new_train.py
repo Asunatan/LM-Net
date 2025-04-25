@@ -26,8 +26,8 @@ from utils.loss import DiceLoss
 import os
 from torch.distributed import init_process_group, destroy_process_group
 from utils.distributed_utils import get_rank
-from torchmetrics import MetricCollection, Accuracy, Precision, Recall, AUROC, F1Score, JaccardIndex, Dice, Specificity
-
+from torchmetrics import MetricCollection, Accuracy, Precision, Recall, AUROC, F1Score, JaccardIndex, Specificity
+from torchmetrics.segmentation import DiceScore,HausdorffDistance
 #from scipy.spatial.distance import directed_hausdorff
 # from skimage.metrics import hausdorff_distance
 #from medpy.metric.binary import hd,hd95
@@ -113,9 +113,9 @@ def main_single(rank, k_fold, args):
 
     if args.k_fold:
         print(args.dataset)
-        train_df = pd.read_csv(r'/home/uax/SCY/seg/dataset/train_{}_{}.csv'.format(args.dataset,k_fold))
-        valid_df = pd.read_csv(r'/home/uax/SCY/seg/dataset/val_{}_{}.csv'.format(args.dataset,k_fold))
-        test_df = pd.read_csv(r'/home/uax/SCY/seg/dataset/test_{}_0.1.csv'.format(args.dataset))
+        train_df = pd.read_csv(r'/data/scy/SCY/LM-Net-main/dataset/train_{}_{}.csv'.format(args.dataset,k_fold))
+        valid_df = pd.read_csv(r'/data/scy/SCY/LM-Net-main/dataset/val_{}_{}.csv'.format(args.dataset,k_fold))
+        test_df = pd.read_csv(r'/data/scy/SCY/LM-Net-main/dataset/test_{}_0.1.csv'.format(args.dataset))
         train_dataset = MedicineDataset(train_df, 'train')
         val_dataset = MedicineDataset(valid_df, 'val')
         test_dataset = MedicineDataset(test_df, 'val')
@@ -167,7 +167,7 @@ def main_single(rank, k_fold, args):
         Precision(task=args.categories, num_classes=args.num_classes, average='macro'),
         Recall(task=args.categories, num_classes=args.num_classes, average='macro'),
         Specificity(task=args.categories, num_classes=args.num_classes, average='macro'),
-        Dice(num_classes=args.num_classes, average='macro'),
+        DiceScore(num_classes=args.num_classes, average='macro'),
         JaccardIndex(task=args.categories, num_classes=args.num_classes, average='macro'),
         JaccardIndex(task='multiclass', num_classes=args.num_classes, average='macro'),
     ])
