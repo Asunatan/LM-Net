@@ -208,14 +208,14 @@ class MedicineDataset(Dataset):
             A.RandomResizedCrop((256, 256), scale=(0.8, 1.0), p=1.0),
             #A.Resize(256, 256),
             A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=30, border_mode=cv2.BORDER_CONSTANT,
-                               value=0, p=0.5),
+                                p=0.5),
             A.HorizontalFlip(p=0.5),  # 垂直翻转
             A.VerticalFlip(p=0.5),  # 水平翻转
             A.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2, p=0.4),
             A.OneOf([
                 A.ToGray(p=1),
-                A.GridDistortion(border_mode=cv2.BORDER_CONSTANT, value=0,p=1),
-                A.ElasticTransform(border_mode=cv2.BORDER_CONSTANT, value=0,p=1),
+                A.GridDistortion(p=1),
+                A.ElasticTransform(p=1),
                 A.CLAHE(p=1),
                 A.HueSaturationValue(p=1),
                 A.ChannelShuffle(p=1),
